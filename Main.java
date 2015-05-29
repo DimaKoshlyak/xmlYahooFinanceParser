@@ -1,42 +1,37 @@
-package dz2.xmlYahooFinanceParser;
+package jsonYahooFinanceParser;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import javax.xml.bind.*;
 
-/*
- * parser for Yahoo Finance based on xml. created by Dima Koshlyak
- */
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Main {
 
-	public static void main(String[] args) throws IOException, JAXBException {
-
-		File file = new File("result.txt");
+	public static void main(String[] args) throws Exception {
 
 		String request = "http://query.yahooapis.com/v1/public/yql?format=xml&q=select%20*%20from%20"
 				+ "yahoo.finance.xchange%20where%20pair%20in%20(\"USDEUR\",%20\"USDUAH\")&env=store://datatables.org/alltableswithkeys";
 
-		performRequest(request);
-
-		JAXBContext jc = JAXBContext.newInstance(Query.class);
-		Unmarshaller unmarshaller = jc.createUnmarshaller();
-
-		Query query = (Query) unmarshaller.unmarshal(new File(
-				"output_yahoo.xml"));
-
-		Marshaller marshaller = jc.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-		marshaller.marshal(query, file);
-		System.out.println(query);
+		String result = performRequest(request);
+		System.out.println(result);
+		// Gson gson = new GsonBuilder().create();
+		// JSON json = (JSON) gson.fromJson(result, JSON.class);
+		//
+		// for (Rate rate : json.query.results.rate) {
+		// System.out.println(rate.id + "=" + rate.Rate);
+		// }
+		//
+		// System.out.println("JSON: \n\t" + gson.toJson(json));
 	}
 
-	private static void performRequest(String urlStr) throws IOException {
-		System.out.println("Reqest has sent...");
+	private static String performRequest(String urlStr) throws IOException {
 		URL url = new URL(urlStr);
 		StringBuilder sb = new StringBuilder();
+
 		HttpURLConnection http = (HttpURLConnection) url.openConnection();
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -51,10 +46,8 @@ public class Main {
 		} finally {
 			http.disconnect();
 		}
-		BufferedWriter br = new BufferedWriter(new FileWriter(new File(
-				"output_yahoo.xml")));
-		br.write(sb.toString());
-		br.close();
-		System.out.println("Request has recieved...\n");
+
+		return sb.toString();
 	}
+
 }
